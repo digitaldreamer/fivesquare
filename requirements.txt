@@ -1,0 +1,15 @@
+Jinja2==2.7.3
+Sphinx==1.3.1
+argparse==1.2.1
+colander==1.0
+cornice==1.0.0
+ipdb==0.8.1
+ipython==3.2.1
+nose==1.3.7
+pyramid==1.5.7
+pyramid-debugtoolbar==2.4
+pyramid-jinja2==2.5
+pymongo==3.0.3
+requests==2.7.0
+uWSGI==2.0.11.1
+WebTest==2.0.18
