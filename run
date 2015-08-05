@@ -1,0 +1,4 @@
+#!/bin/bash
+set -e
+python service/setup.py develop
+python runapp.py
