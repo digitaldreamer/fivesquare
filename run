@@ -1,4 +1,7 @@
 #!/bin/bash
 set -e
-python service/setup.py develop
+cd service
+python setup.py develop
+
+cd ..
 python runapp.py
