@@ -9,7 +9,7 @@ python setup.py develop
 cd $(ROOT)
 
 # compile sphinx
-cd docs
+cd service/docs
 make html
 cd $(ROOT)
 
