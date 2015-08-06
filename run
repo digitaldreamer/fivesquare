@@ -1,7 +1,17 @@
 #!/bin/bash
 set -e
+
+ROOT=$(pwd)
+
+# intialize the app
 cd service
 python setup.py develop
+cd $(ROOT)
 
-cd ..
+# compile sphinx
+cd docs
+make html
+cd $(ROOT)
+
+# run the app
 python runapp.py
