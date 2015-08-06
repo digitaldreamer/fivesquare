@@ -46,4 +46,4 @@ clean:
 	rm -rf $(HTML_DIR)/$(STATIC_DIR)
 
 tailog:
-	sudo tail -F /var/log/uwsgi/noteorious.log
+	heroku logs --tail --app hinge-api-interview-juniper
