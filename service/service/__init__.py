@@ -23,14 +23,22 @@ def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     config = Configurator(settings=settings)
-    config.include('pyramid_chameleon')
+    config.include('pyramid_jinja2')
+    config.include('cornice')
 
-    config.add_static_view('static', 'static', cache_max_age=3600)
-    config.add_route('home', '/home')
+    # templates
+    config.add_notfound_view(notfound, append_slash=False)
+    config.add_renderer('.html', 'pyramid_jinja2.renderer_factory')
+    config.add_renderer('.jinja2', 'pyramid_jinja2.renderer_factory')
+    config.add_jinja2_search_path('templates')
 
+    # apps
+    config.include('main')
+    config.include('businesses', route_prefix='/api/v1')
+
+    # static files
     config.add_route('catchall_static', '/*subpath')
+    config.add_static_view('static', 'static', cache_max_age=3600)
     config.add_view('service.static.static_view', route_name='catchall_static')
 
-    config.add_notfound_view(notfound, append_slash=False)
-    config.scan()
     return config.make_wsgi_app()

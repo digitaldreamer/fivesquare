@@ -8,9 +8,10 @@ cd service
 python setup.py develop
 cd ${ROOT}
 
-# compile sphinx
-cd service/docs
-make html
+# compile project
+cd service
+make clean
+make build
 cd ${ROOT}
 
 # run the app

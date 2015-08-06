@@ -6,11 +6,26 @@
 Welcome to fivesquare's documentation!
 ======================================
 
-Contents:
+AUTHENTICATION
+--------------
+
+ENDPOINTS
+---------
+
+/businesses
 
 .. toctree::
-   :maxdepth: 2
+    :maxdepth: 1
 
+    services/businesses
+
+/reviews
+
+/users
+
+/auth
+
+/search
 
 
 Indices and tables
@@ -19,4 +34,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-
