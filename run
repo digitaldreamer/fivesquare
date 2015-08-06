@@ -6,12 +6,12 @@ ROOT=$(pwd)
 # intialize the app
 cd service
 python setup.py develop
-cd $(ROOT)
+cd ${ROOT}
 
 # compile sphinx
 cd service/docs
 make html
-cd $(ROOT)
+cd ${ROOT}
 
 # run the app
 python runapp.py
