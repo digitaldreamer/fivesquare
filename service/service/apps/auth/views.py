@@ -1,11 +1,11 @@
 import json
-import jwt
 
 from datetime import datetime
 from cornice import Service
 from pyramid.exceptions import Forbidden
 from pyramid.view import view_config
 
+from auth.security import create_access_token
 from auth.models import User
 from auth.schemas import AuthSchema, NewUserSchema, UserSchema, UserPasswordSchema
 from service import logger
@@ -44,8 +44,6 @@ class AuthViews(object):
                 'user_id': ''
             }
         """
-        from settings import config
-
         email = request.validated['email']
         password = request.validated['password']
         user = User.authenticate_user(email, password)
@@ -53,11 +51,7 @@ class AuthViews(object):
 
         if user:
             logger.debug('user:{} authenticated'.format(email))
-            data = {
-                'user_id': str(user.id),
-                'created': datetime.utcnow().isoformat(),
-            }
-            encoded = jwt.encode(data, config.get('pepper', ''), algorithm='HS256')
+            access_token = create_access_token(user)
             response_body = json.dumps({
                 'access_token': encoded,
                 'user_id': str(user.id),
