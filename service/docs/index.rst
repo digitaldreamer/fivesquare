@@ -6,26 +6,31 @@
 Welcome to fivesquare's documentation!
 ======================================
 
+All endpoints are rooted from the API Base URL::
+
+    http://hinge-api-interview-juniper.herokuapp.com/api/v1
+
+
 AUTHENTICATION
 --------------
 
 ENDPOINTS
 ---------
 
-/businesses
+| :doc:`/businesses <services/businesses>`
+| :doc:`/reviews <index>`
+| :doc:`/users <services/auth>`
+| :doc:`/auth <services/auth>`
+| :doc:`/search <index>`
+|
+
+Services
 
 .. toctree::
     :maxdepth: 1
 
+    services/auth
     services/businesses
-
-/reviews
-
-/users
-
-/auth
-
-/search
 
 
 Indices and tables
