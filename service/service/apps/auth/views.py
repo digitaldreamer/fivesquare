@@ -1,17 +1,20 @@
 import json
+import jwt
 
+from datetime import datetime
 from cornice import Service
 from pyramid.exceptions import Forbidden
 from pyramid.view import view_config
 
 from auth.models import User
-from auth.schemas import AuthSchema, UserSchema, NewUserSchema
+from auth.schemas import AuthSchema, NewUserSchema, UserSchema, UserPasswordSchema
 from service import logger
 
 
 auth = Service(name='authenticate', path='/authenticate', description='Authentication')
 users = Service(name='users', path='/users', description='Users')
 user = Service(name='user', path='/users/{user_id}', description='User')
+user_password = Service(name='user_password', path='/users/{user_id}/password', description='User Password')
 
 
 class AuthViews(object):
@@ -27,23 +30,38 @@ class AuthViews(object):
     @auth.post(schema=AuthSchema)
     def auth_post(request):
         """
-        an endpoint to authenticate users
-        returns a user if passes, otherwise sends 401 auth error
+        an endpoint to authenticate users and retrieve their access token
 
-        email: the user's email
-        password: the user's password
+        Parameters:
+            email - the user's email
+            password - the user's password
+
+        Returns:
+            returns a user if passes, otherwise sends 401 auth error
+
+            {
+                'access_token': '',
+                'user_id': ''
+            }
         """
+        from settings import config
+
         email = request.validated['email']
         password = request.validated['password']
-
-        print email, password
-
         user = User.authenticate_user(email, password)
         response_body = {}
 
         if user:
             logger.debug('user:{} authenticated'.format(email))
-            response_body = user.json
+            data = {
+                'user_id': str(user.id),
+                'created': datetime.utcnow().isoformat(),
+            }
+            encoded = jwt.encode(data, config.get('pepper', ''), algorithm='HS256')
+            response_body = json.dumps({
+                'access_token': encoded,
+                'user_id': str(user.id),
+            })
         else:
             logger.debug('user:{} failed authentication'.format(email))
             request.response.status_int = 401
@@ -86,27 +104,17 @@ class UserViews(object):
         request.response.content_type = 'application/json'
         return request.response
 
-    @user.post(schema=UserSchema)
-    def user_post(request):
+    @user.put(schema=UserSchema)
+    def user_put(request):
+        """
+        Update user
+        """
         user_id = request.matchdict['user_id']
         user = User.get_by_id(user_id)
-        keys = request.validated.keys()
 
-        if not keys:
-            logger.debug('failed to update user:{} no keys'.format(user_id))
-            request.response.status_int = 400
-            response_body = json.dumps({
-                'status': 'error',
-                'message': 'nothing to update'
-            })
-        elif user:
-            # check for fields to update
-            if 'active' in keys:
-                user.active = request.validated['active']
-            if 'email' in keys:
-                user.email = request.validated['email']
-            if 'password' in keys:
-                user.password = request.validated['password']
+        if user:
+            user.active = request.validated['active']
+            user.email = request.validated['email']
 
             # save
             if user.save():
@@ -124,6 +132,44 @@ class UserViews(object):
                 })
         else:
             logger.debug('failed to update user:{} user not found'.format(user_id))
+            request.response.status_int = 404
+            response_body = json.dumps({
+                'status': 'error',
+                'message': 'could not find user'
+            })
+
+        request.response.body = response_body
+        request.response.content_type = 'application/json'
+        return request.response
+
+    @user_password.put(schema=UserPasswordSchema)
+    def user_password_put(request):
+        """
+        Update user's password
+        """
+        user_id = request.matchdict['user_id']
+        user = User.get_by_id(user_id)
+
+        if user:
+            # check for fields to update
+            user.password = request.validated['password']
+
+            # save
+            if user.save():
+                logger.debug('user:{} updated'.format(user_id))
+                response_body = json.dumps({
+                    'status': 'success',
+                    'message': 'user password updated'
+                })
+            else:
+                logger.debug('failed to save user:{} password'.format(user_id))
+                request.response.status_int = 400
+                response_body = json.dumps({
+                    'status': 'error',
+                    'message': 'failed to update user'
+                })
+        else:
+            logger.debug('failed to update user:{} password, user not found'.format(user_id))
             request.response.status_int = 404
             response_body = json.dumps({
                 'status': 'error',

@@ -35,6 +35,7 @@ def main(global_config, **settings):
     # apps
     config.include('main')
     config.include('businesses', route_prefix='/api/v1')
+    config.include('auth', route_prefix='/api/v1')
 
     # static files
     config.add_route('catchall_static', '/*subpath')

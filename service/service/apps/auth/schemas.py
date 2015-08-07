@@ -13,6 +13,9 @@ class NewUserSchema(MappingSchema):
 
 
 class UserSchema(MappingSchema):
-    active = SchemaNode(Boolean(), location='body', type='bool', missing=drop)
-    email = SchemaNode(String(), location='body', type='str', missing=drop)
-    password = SchemaNode(String(), location='body', type='str', missing=drop)
+    active = SchemaNode(Boolean(), location='body', type='bool', missing=False)
+    email = SchemaNode(String(), location='body', type='str')
+
+
+class UserPasswordSchema(MappingSchema):
+    password = SchemaNode(String(), location='body', type='str')

@@ -134,24 +134,25 @@ class AuthAPI(unittest.TestCase):
         testing.tearDown()
 
     def test_auth_get(self):
-        response = self.testapp.get('/authenticate', status=200)
+        response = self.testapp.get('/api/v1/authenticate', status=200)
         self.assertTrue('hello' in response.json)
         self.assertTrue(response.json['hello'] == 'world')
 
     def test_auth_post(self):
-        response = self.testapp.post_json('/authenticate', {}, status=400)
+        response = self.testapp.post_json('/api/v1/authenticate', {}, status=400)
 
         payload = {
             'email': 'wrong',
             'password': 'wrong',
         }
-        response = self.testapp.post_json('/authenticate', payload, status=401)
+        response = self.testapp.post_json('/api/v1/authenticate', payload, status=401)
 
         payload = {
             'email': 'hello@example.com',
             'password': 'hello',
         }
-        response = self.testapp.post_json('/authenticate', payload, status=200)
+        response = self.testapp.post_json('/api/v1/authenticate', payload, status=200)
+        self.assertTrue(response.json['access_token'] and response.json['user_id'])
 
 
 class UserAPI(unittest.TestCase):
@@ -176,17 +177,17 @@ class UserAPI(unittest.TestCase):
         testing.tearDown()
 
     def test_user_creation(self):
-        response = self.testapp.post_json('/users', {}, status=400)
+        response = self.testapp.post_json('/api/v1/users', {}, status=400)
 
         payload = {
             'email': 'hello@example.com',
             'password': 'hello',
         }
-        response = self.testapp.post_json('/users', payload, status=200)
+        response = self.testapp.post_json('/api/v1/users', payload, status=200)
         self.assertTrue(response.json['id'])
 
         # check duplicate
-        response = self.testapp.post_json('/users', payload, status=400)
+        response = self.testapp.post_json('/api/v1/users', payload, status=400)
 
         # check database and clean up
         user = User.get_by_email('hello@example.com')

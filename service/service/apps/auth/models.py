@@ -66,7 +66,7 @@ class User(MongoObject):
 
         hashed = bcrypt.hashpw(str(password) + pepper, self.data.get('password', '').encode('utf8'))
 
-        if hashed == self.data.get('password', ''):
+        if hashed == self.data.get('password'):
             validated = True
 
         return validated
