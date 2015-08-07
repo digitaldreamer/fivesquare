@@ -4,9 +4,9 @@ HINGE FIVESQUARE
 
 This is the documentation for the Fivesquare tech task for Hinge.
 
-See the `wiki<https://github.com/digitaldreamer/fivesquare/wiki/Task>`_ to review the task.
+See the `wiki <https://github.com/digitaldreamer/fivesquare/wiki/Task>`_ to review the task.
 
-Check out the `API documentation<http://hinge-api-interview-juniper.herokuapp.com/>` for instructions.
+Check out the `API documentation <http://hinge-api-interview-juniper.herokuapp.com/>`_ for instructions.
 
 
 SETUP
