@@ -53,7 +53,7 @@ class AuthViews(object):
             logger.debug('user:{} authenticated'.format(email))
             access_token = create_access_token(user)
             response_body = json.dumps({
-                'access_token': encoded,
+                'access_token': access_token,
                 'user_id': str(user.id),
             })
         else:
