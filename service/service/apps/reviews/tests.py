@@ -53,6 +53,34 @@ class ReviewModel(unittest.TestCase):
             'state': 'NY'
         }
         business = Business.create('Central Park', address)
+
+        address = {
+            'street1': '2200 Broadway',
+            'city': 'New York',
+            'state': 'NY'
+        }
+        business = Business.create('2200', address)
+
+        address = {
+            'street1': '1800 Broadway',
+            'city': 'New York',
+            'state': 'NY'
+        }
+        business = Business.create('1800', address)
+
+        address = {
+            'street1': '1500 Broadway',
+            'city': 'New York',
+            'state': 'NY'
+        }
+        business = Business.create('1500', address)
+
+        address = {
+            'street1': '1200 Broadway',
+            'city': 'New York',
+            'state': 'NY'
+        }
+        business = Business.create('1200', address)
         return business
 
     def reset(self):

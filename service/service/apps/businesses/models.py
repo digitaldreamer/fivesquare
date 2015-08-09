@@ -114,7 +114,7 @@ class Business(MongoObject):
                 radius = 3959  # miles
 
             max_distance = distance / radius
-            mongo_businesses = mongodb[cls.collection].find({'location': {'$nearSphere': location, '$maxDistance': max_distance}}).sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
+            mongo_businesses = mongodb[cls.collection].find({'location': {'$nearSphere': location, '$maxDistance': max_distance}}).limit(limit).skip(offset)
         else:
             mongo_businesses = mongodb[cls.collection].find().sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
 

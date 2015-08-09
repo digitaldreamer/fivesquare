@@ -64,7 +64,7 @@ def validate_access_token(access_token):
         now = datetime.utcnow()
         then = datetime.fromtimestamp(decoded['iat'])
 
-        age = now - decoded['iat']
+        age = now - then
         user = User.get_by_id(decoded['user_id'])
 
         if age.seconds > 60 * 60 * 5:

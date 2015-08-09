@@ -19,20 +19,20 @@ class BusinessModel(unittest.TestCase):
         testing.tearDown()
 
     def test_business(self):
-        business = self.create_business()
-        # self.email(user)
-        # self.password(user)
-        # self.authentication(user)
-        # self.assertTrue(user.delete())
-
-    def create_business(self):
-        # check business
         address = {
             'street1': 'Central Park',
             'city': 'New York',
             'state': 'NY'
         }
-        business = Business.create('Central Park', address)
+        business = self.create_business('Central Park', address)
+        # self.email(user)
+        # self.password(user)
+        # self.authentication(user)
+        # self.assertTrue(user.delete())
+
+    def create_business(self, name, address):
+        # check business
+        business = Business.create(name, address)
         self.created_ids.append(business.id)
         self.assertTrue(business)
 
@@ -88,6 +88,10 @@ class BusinessModel(unittest.TestCase):
 
             if business:
                 business.delete()
+
+
+# http://localhost:8000/api/v1/businesses?lng=-73.988395&lat=40.7461666&distance=3
+
 
 
 # class AuthAPI(unittest.TestCase):
