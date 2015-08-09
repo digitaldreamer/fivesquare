@@ -2,6 +2,7 @@ import copy
 import json
 
 from bson import ObjectId
+from bson.errors import InvalidId
 from datetime import datetime
 
 from service import logger
@@ -120,7 +121,14 @@ class MongoObject(object):
     @classmethod
     def get_by_id(cls, id):
         obj = None
-        mongo_obj = mongodb[cls.collection].find_one({'_id': ObjectId(id)})
+
+        try:
+            _id = ObjectId(id)
+        except InvalidId:
+            mongo_obj = None
+            logger.debug('invalid ObjectId id:{}'.format(id))
+        else:
+            mongo_obj = mongodb[cls.collection].find_one({'_id': _id})
 
         if mongo_obj:
             obj = cls(mongo=mongo_obj)

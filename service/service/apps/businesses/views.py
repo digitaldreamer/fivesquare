@@ -5,7 +5,8 @@ from pyramid.exceptions import Forbidden
 from pyramid.view import view_config
 
 from businesses.models import Business
-from businesses.schemas import BusinessesSchema
+from businesses.schemas import BusinessSchema, BusinessesSchema
+from reviews.models import Review
 from service import logger
 from service.utils.jsonencoder import ComplexEncoder
 
@@ -64,7 +65,7 @@ class BusinessViews(object):
         limit = request.validated['limit']
         offset = request.validated['offset']
         businesses = Business.businesses(limit=limit, offset=offset)
-        businesses_count = Business.count()
+        businesses_count = len(businesses)
         businesses_jsonable = []
 
         for business in businesses:
@@ -79,16 +80,22 @@ class BusinessViews(object):
         request.response.content_type = 'application/json'
         return request.response
 
-    @business.get()
-    def businesses_get(request):
+    @business.get(schema=BusinessSchema)
+    def business_get(request):
         """
         Returns the business
         """
         business_id = request.matchdict['business_id']
+        include_reviews = request.validated['reviews']
         business = Business.get_by_id(business_id)
 
         if business:
-            response_body = business.json
+            response_body = business.toJSON()
+
+            if include_reviews:
+                response_body['reviews'] = Review.reviews_for_reviewed(business.collection, business.id)
+
+            response_body = json.dumps(response_body, cls=ComplexEncoder)
             logger.debug('Retrieved business:{}'.format(business.id))
         else:
             logger.debug('Failed to retrieve business:{}'.format(business_id))

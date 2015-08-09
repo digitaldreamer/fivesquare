@@ -43,6 +43,9 @@ class ReviewModel(unittest.TestCase):
         self.assertTrue(self.business.rating == 1)
         self.assertFalse('something' in self.business.tags)
 
+        review = Review.create(self.user.id, self.business, 5, 'This is a another review', tags=['hello', 'something'])
+        self.created_ids.append(review.id)
+
     def create_business(self):
         address = {
             'street1': 'Central Park',
@@ -56,6 +59,7 @@ class ReviewModel(unittest.TestCase):
         """
         clean up any remaining test users
         """
+        return
         for _id in self.created_ids:
             review = Review.get_by_id(_id)
 
@@ -64,4 +68,3 @@ class ReviewModel(unittest.TestCase):
 
         self.user.delete()
         self.business.delete()
-

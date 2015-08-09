@@ -143,6 +143,24 @@ class Review(MongoObject):
         return rating
 
     @classmethod
+    def reviews_for_reviewed(cls, reviewed_collection, reviewed_id):
+        """
+        returns the reviewes for the reviewed object
+        """
+        query = {
+            'reviewed_collection': reviewed_collection,
+            'reviewed_id': ObjectId(reviewed_id),
+        }
+        reviews = []
+        mongo_reviews = mongodb[cls.collection].find(query).sort('created', pymongo.DESCENDING)
+
+        for mongo_review in mongo_reviews:
+            review = cls(mongo=mongo_review)
+            reviews.append(review)
+
+        return reviews
+
+    @classmethod
     def create(cls, user_id, reviewed, rating, text, tags=[]):
         """
         creates, saves, and returns a new review

@@ -1,15 +1,22 @@
 import pymongo
 
 from main.models import MongoObject
+from pymongo import GEO2D
+
 from service import logger
 from storage.mongo import mongodb
 from maps.maps import GoogleMaps
+
+mongodb.businesses.ensure_index([("location", GEO2D)])
 
 
 class Business(MongoObject):
     collection = 'businesses'
 
     def __init__(self, name='', address={}, mongo=None):
+        """
+        location: [<longitude>, <latitude>]
+        """
         super(Business, self).__init__(mongo=mongo)
 
         if not mongo:
@@ -73,9 +80,10 @@ class Business(MongoObject):
             'postal_code': '',
         }
         address.update(address_fields)
-
         self.data['address'] = address
-        self.data['location'] = google_maps.geocode(self.address_string)
+
+        maps_location = google_maps.geocode(self.address_string)
+        self.data['location'] = [maps_location['lng'], maps_location['lat']]
 
     @property
     def address_string(self):
@@ -89,12 +97,27 @@ class Business(MongoObject):
         return data
 
     @classmethod
-    def businesses(cls, offset=0, limit=100):
+    def businesses(cls, location=[], distance=1, units='imperial', offset=0, limit=100):
         """
         Return the businesses
+
+        units: metric|imperial
+        location: [<longitude>, <latitude>]
         """
         businesses = []
-        mongo_businesses = mongodb[cls.collection].find().sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
+
+        if location and distance:
+            if units == 'metric':
+                radius = 6371  # kilometers
+            else:
+                # default to imperial
+                radius = 3959  # miles
+
+            max_distance = distance / radius
+            mongo_businesses = mongodb[cls.collection].find({'location': {'$nearSphere': location, '$maxDistance': max_distance}}).sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
+        else:
+            mongo_businesses = mongodb[cls.collection].find().sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
+
 
         for mongo_business in mongo_businesses:
             business = cls(mongo=mongo_business)
