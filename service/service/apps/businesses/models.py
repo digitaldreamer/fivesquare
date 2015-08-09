@@ -1,122 +1,112 @@
-import bcrypt
+import pymongo
 
-from bson import ObjectId
-from datetime import datetime
-
-from auth.exceptions import UserSaveError
 from main.models import MongoObject
 from service import logger
 from storage.mongo import mongodb
+from maps.maps import GoogleMaps
 
 
-class User(MongoObject):
-    collection = 'users'
+class Business(MongoObject):
+    collection = 'businesses'
 
-    def __init__(self, email='', password='', active=False, mongo=None):
-        super(User, self).__init__(mongo=mongo)
+    def __init__(self, name='', address={}, mongo=None):
+        super(Business, self).__init__(mongo=mongo)
 
         if not mongo:
             self.data.update({
-                'active': 'false',
-                'email': '',
-                'password': '',
+                'address': {
+                    'street1': '',
+                    'street2': '',
+                    'city': '',
+                    'state': '',
+                    'postal_code': '',
+                },
+                'location': [0, 0],
+                'rating': 0,
+                'tags': [],
             })
 
-        if email:
-            self.email = email
-        if password:
-            self.password = password
+        if name:
+            self.name = name
+        if address:
+            self.address = address
 
     @property
-    def email(self):
-        return self.data.get('email', '')
+    def name(self):
+        return self.data.get('name', '')
 
-    @email.setter
-    def email(self, email):
-        self.data['email'] = email
+    @name.setter
+    def name(self, name):
+        self.data['name'] = name
 
     @property
-    def password(self):
-        return self.data.get('password', '')
+    def rating(self):
+        return self.data.get('rating', 0)
 
-    @password.setter
-    def password(self, password):
+    @rating.setter
+    def rating(self, rating):
+        self.data['rating'] = rating
+
+    @property
+    def tags(self):
+        return self.data.get('tags', [])
+
+    @tags.setter
+    def tags(self, tags):
+        self.data['tags'] = tags
+
+    @property
+    def address(self):
+        return self.data.get('address', {})
+
+    @address.setter
+    def address(self, address_fields):
         from settings import config
 
-        pepper = config.get('pepper', '')
-        hashed = bcrypt.hashpw(str(password) + pepper, bcrypt.gensalt())
-        self.data['password'] = hashed
+        google_maps = GoogleMaps(config['google_maps.api_key'])
+
+        address = {
+            'street1': '',
+            'street2': '',
+            'city': '',
+            'state': '',
+            'postal_code': '',
+        }
+        address.update(address_fields)
+
+        self.data['address'] = address
+        self.data['location'] = google_maps.geocode(self.address_string)
+
+    @property
+    def address_string(self):
+        return '{street1} {street2}, {city}, {state}, {postal_code}'.format(**self.data['address'])
 
     def toJSON(self):
         """
         returns a cleaned jsonable object
         """
-        data = super(User, self).toJSON()
-        data.pop('password')
+        data = super(Business, self).toJSON()
         return data
 
-    def authenticate(self, password):
+    @classmethod
+    def businesses(cls, offset=0, limit=100):
         """
-        checks to see if the password matches the user's saved password
+        Return the businesses
         """
-        from settings import config
+        businesses = []
+        mongo_businesses = mongodb[cls.collection].find().sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
 
-        validated = False
-        pepper = config.get('pepper', '')
+        for mongo_business in mongo_businesses:
+            business = cls(mongo=mongo_business)
+            businesses.append(business)
 
-        hashed = bcrypt.hashpw(str(password) + pepper, self.data.get('password', '').encode('utf8'))
-
-        if hashed == self.data.get('password', ''):
-            validated = True
-
-        return validated
-
-    def save(self):
-        """
-        saves the user
-        """
-        existing_user = User.get_by_email(self.email)
-
-        # check for duplicate emails
-        if existing_user and existing_user.id != self.id:
-            raise UserSaveError('email already exists')
-
-        return super(User, self).save()
+        return businesses
 
     @classmethod
-    def authenticate_user(cls, email, password):
+    def create(cls, name, address):
         """
-        returns the user if the email and passwords authenticate,
-        otherwise returns None
+        creates, saves, and returns a new business
         """
-        user = cls.get_by_email(email)
-
-        if user and not user.authenticate(password):
-            user = None
-
-        return user
-
-    @classmethod
-    def get_by_email(cls, email):
-        user = None
-
-        mongo_user = mongodb[cls.collection].find_one({'email': email})
-
-        if mongo_user:
-            user = User(mongo=mongo_user)
-
-        return user
-
-    @classmethod
-    def create(cls, email, password, active=False):
-        """
-        creates, saves, and returns a new user
-        """
-        # check for dumplicate emails
-        if cls.get_by_email(email):
-            return None
-
-        user = User(email=email, password=password, active=active)
-        user.save()
-
-        return user
+        business = cls(name, address)
+        business.save()
+        return business

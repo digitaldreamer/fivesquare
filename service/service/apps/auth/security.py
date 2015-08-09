@@ -55,20 +55,24 @@ def validate_access_token(access_token):
     from settings import config
 
     validated = False
-    decoded = jwt.decode(access_token, config.get('pepper', ''), algorithms=['HS256'])
-    now = datetime.utcnow()
-    then = datetime.fromtimestamp(decoded['iat'])
 
-    age = now - decoded['iat']
-    user = User.get_by_id(decoded['user_id'])
+    try:
+        decoded = jwt.decode(access_token, config.get('pepper', ''), algorithms=['HS256'])
+    except jwt.DecodeError:
+        logger.debug('jwt DecodeError')
+    else:
+        now = datetime.utcnow()
+        then = datetime.fromtimestamp(decoded['iat'])
 
-    if age.seconds > 86400 * 7:
-        logger.debug('Stale Key, timestamp expired')
-        validated = False
-    elif user:
-        validated = {
-            'user': user,
-        }
-        logger.debug('Valid Key user:{}'.format(user.id))
+        age = now - decoded['iat']
+        user = User.get_by_id(decoded['user_id'])
+
+        if age.seconds > 60 * 60 * 5:
+            logger.debug('Stale Key, timestamp expired')
+        elif user:
+            validated = {
+                'user': user,
+            }
+            logger.debug('Valid Key user:{}'.format(user.id))
 
     return validated

@@ -125,14 +125,20 @@ class MongoObject(object):
         if mongo_obj:
             obj = cls(mongo=mongo_obj)
         else:
-            logger.debug('did not find {} id:{}'.format(self.collection, id))
+            logger.debug('did not find {} id:{}'.format(cls.collection, id))
 
         return obj
+
+    @classmethod
+    def count(cls):
+        """
+        returns the count of documents in the database
+        """
+        return mongodb[cls.collection].find().count()
 
     @classmethod
     def create(cls):
         """
         creates, saves, and returns a new objects
         """
-
         pass

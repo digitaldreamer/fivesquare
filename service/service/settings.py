@@ -1,5 +1,8 @@
 """
 export PYRAMID_SETTINGS=/place/to/development.ini#main
+
+migh want to replace this file with
+pyramid.threadlocal.get_current_registry().settings
 """
 import os
 

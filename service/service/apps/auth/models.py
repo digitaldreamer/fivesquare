@@ -1,8 +1,5 @@
 import bcrypt
 
-from bson import ObjectId
-from datetime import datetime
-
 from auth.exceptions import UserSaveError
 from main.models import MongoObject
 from service import logger
