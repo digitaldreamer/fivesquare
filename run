@@ -3,6 +3,8 @@ set -e
 
 ROOT=$(pwd)
 
+export PYRAMID_SETTINGS="production.ini#main"
+
 # intialize the app
 cd service
 python setup.py develop
