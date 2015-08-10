@@ -19,10 +19,10 @@ def prompt(env):
     user = User.create(email, password1)
 
     if user:
-        print "user '{}' created".format(user.email)
+        print "user '{}' created".format(user.id)
     else:
         # TODO: better error messaging
-        print "error: user {} not created" % email
+        print "error: user {} not created".format(email)
 
 
 def main(argv=sys.argv):
