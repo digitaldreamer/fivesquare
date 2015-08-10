@@ -14,7 +14,6 @@ class RedisClient(object):
     _timeout = 300
 
     def __init__(self, host, port, redis_type='cache', password='', prefix='', timeout=300):
-        from
         self.type = redis_type
         self._redis = redis.Redis(host, port, password=password, socket_timeout=2)
         self._prefix = prefix
@@ -71,9 +70,9 @@ class RedisCache(RedisClient):
             pickled_value = pickle.dumps(value)
             stored_value = '%s%s' % (self._pickle_token, pickled_value)
 
-        # set default timerout, ignore if not set
+        # set default timer, ignore if not set
         if self._timeout:
-            response = self._redis.setes(key_token, stored_value, self._timeout)
+            response = self._redis.setex(key_token, stored_value, self._timeout)
         else:
             response = self._redis.set(key_token, stored_value)
 
@@ -108,7 +107,11 @@ class RedisCache(RedisClient):
         deletes all keys that matches the pattern
         """
         key_tokens = self.keys(pattern)
-        response = self._redis.delete(*key_tokens)
+
+        if key_tokens:
+            response = self._redis.delete(*key_tokens)
+        else:
+            response = True
 
         for key_token in key_tokens:
             logger.debug('Delete cache key:%s' % key_token)

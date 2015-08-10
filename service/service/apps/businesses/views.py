@@ -12,6 +12,7 @@ from reviews.models import Review
 from reviews.schemas import ReviewSchema
 from service import logger
 from service.utils.jsonencoder import ComplexEncoder
+from storage.redis import redis_cache
 
 
 businesses = Service(name='businesses', path='/businesses', description='Businesses')
@@ -145,18 +146,30 @@ class BusinessViews(object):
     def business_get(request):
         """
         Returns the business
+
         """
         business_id = request.matchdict['business_id']
         include_reviews = request.validated['reviews']
         business = Business.get_by_id(business_id)
 
-        if business:
+        # a light redis check is an example of how queries can be further optimized
+        if include_reviews:
+            cache_key = 'business:{}:reviews-true'.format(business_id)
+        else:
+            cache_key = 'business:{}:reviews-false'.format(business_id)
+
+        cached = redis_cache.get(cache_key)
+
+        if cached and business:
+            response_body = cached
+        elif business:
             response_body = business.toJSON()
 
             if include_reviews:
                 response_body['reviews'] = Review.reviews_for_reviewed(business.collection, business.id)
 
             response_body = json.dumps(response_body, cls=ComplexEncoder)
+            redis_cache.set(cache_key, response_body)
             logger.debug('Retrieved business:{}'.format(business.id))
         else:
             logger.debug('Failed to retrieve business:{}'.format(business_id))
@@ -221,6 +234,10 @@ class BusinessReviewViews(object):
             response_body = {
                 'id': review.id,
             }
+
+            # kill cache
+            cache_key = 'business:{}*'.format(business.id)
+            redis_cache.delete_pattern(cache_key)
         else:
             logger.debug('Failed to create review for business:{}'.format(business_id))
             request.response.status_int = 400
