@@ -9,12 +9,10 @@ See the `wiki <https://github.com/digitaldreamer/fivesquare/wiki/Task>`_ to revi
 Check out the `API documentation <http://hinge-api-interview-juniper.herokuapp.com/>`_ for instructions.
 
 The project is built with Pyramid. Cornice and Colander is used to power the RESTful API.
-
 BCrypt is used to hash passwords and JWT is used to create access tokens.
-
 The Google Maps API is used to geocode Business Addresses.
-
 Sphinx is used to generate the API documentation.
+The project is structured to be served on Heroku.
 
 WARNING: all endpoints in practice should be run through ssl/https, but for the purpose of this demo the server will run through http.
 
@@ -38,6 +36,9 @@ initialize virtual environment with requirements.txt::
     cd /path/to/project
     make ubuntu
 
+    # personally I have the venv dir outside the project
+    # /env and /envs are .gitignored
+
     cd /path/to/env/dir
     virtualenv fivesquare
     source fivesquare/bin/activate
@@ -52,7 +53,9 @@ There are scripts to help manage the database. They can be run by passing the co
 * load_db - loads and initializes data used for testing
 * create_user - creates a new user
 
-NOTE: because of how settings are loaded you also need to have the ``PYRAMID_SETTINGS`` environment variable set if not running develop.ini.::
+NOTE: because of how settings are loaded you also need to have the ``PYRAMID_SETTINGS`` environment variable set if not running develop.ini.
+
+::
 
     export PYRAMID_SETTINGS=production.ini#main
     reset_db production.ini
@@ -122,7 +125,7 @@ tailog   tail the heroku server logs
 TESTS
 =====
 
-Nose is used for tests. Some of the tests depend on the database to be initialized through the ``load_db`` script. See the SETUP section for details.
+Nose and unittest are used for tests. Some of the tests depend on the database to be initialized through the ``load_db`` script. See the SETUP section for details.
 
 ::
 

@@ -7,6 +7,9 @@ from storage.mongo import mongodb
 
 
 class User(MongoObject):
+    """
+    The User class with mongo storage
+    """
     collection = 'users'
 
     def __init__(self, email='', password='', active=False, mongo=None):
@@ -69,8 +72,10 @@ class User(MongoObject):
         validated = False
         pepper = config.get('pepper', '')
 
+        # hash the password
         hashed = bcrypt.hashpw(str(password) + pepper, self.data.get('password', '').encode('utf8'))
 
+        # check if the hashed password matches the user's hashed password
         if hashed == self.data.get('password'):
             validated = True
 

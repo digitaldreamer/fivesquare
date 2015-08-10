@@ -30,14 +30,24 @@ class AuthViews(object):
     @auth.post(schema=AuthSchema)
     def auth_post(request):
         """
-        an endpoint to authenticate users and retrieve their access token
+        An endpoint to authenticate users and retrieve their access token.
 
-        Parameters:
-            email - the user's email
-            password - the user's password
+        The access token is needed to authenticate requests that needs authorization::
 
-        Returns:
-            returns a user if passes, otherwise sends 401 auth error
+            /endpont?access_token=<access token>
+
+
+        Parameters
+        ==========
+
+        * email - the user's email
+        * password - the user's password
+
+
+        Returns
+        =======
+
+        returns 401 auth error if fails, otherswise returns::
 
             {
                 'access_token': '',
@@ -50,6 +60,7 @@ class AuthViews(object):
         response_body = {}
 
         if user:
+            # user found and authenticated
             logger.debug('user:{} authenticated'.format(email))
             access_token = create_access_token(user)
             response_body = json.dumps({
@@ -57,6 +68,7 @@ class AuthViews(object):
                 'user_id': str(user.id),
             })
         else:
+            # user not found or authenticated
             logger.debug('user:{} failed authentication'.format(email))
             request.response.status_int = 401
             response_body = json.dumps({
@@ -76,6 +88,31 @@ class UserViews(object):
         an endpoint to create new users
 
         new users are not active by default
+
+        TODO: have a user activation process
+
+
+        parameters
+        ==========
+
+        * email
+        * password
+
+
+        errors
+        ======
+
+        status 400 if failed
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                "id": ""
+            }
         """
         email = request.validated['email']
         password = request.validated['password']
@@ -85,13 +122,13 @@ class UserViews(object):
         if user:
             # TODO: send activation email
             logger.debug('new user created')
-            response_body = user.json
+            response_body = json.dumps({'id': user.json['id']})
         else:
             logger.debug('failed to create new user')
             request.response.status_int = 400
             response_body = json.dumps({
                 'status': 'error',
-                'message': 'email already exists'
+                'message': 'failed to create new user'
             })
 
         request.response.body = response_body
@@ -100,6 +137,9 @@ class UserViews(object):
 
     @user.get()
     def user_get(request):
+        """
+        Get user
+        """
         user_id = request.matchdict['user_id']
         user = User.get_by_id(user_id)
 
@@ -122,6 +162,33 @@ class UserViews(object):
     def user_put(request):
         """
         Update user
+
+
+        parameters
+        ==========
+
+        * active - true|false
+        * email
+
+
+        errors
+        ======
+
+        status 400 if failed to update user
+
+        status 404 if user isn't found
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                'status': 'success',
+                'message': 'user updated'
+            }
+
         """
         user_id = request.matchdict['user_id']
         user = User.get_by_id(user_id)
@@ -160,6 +227,33 @@ class UserViews(object):
     def user_password_put(request):
         """
         Update user's password
+
+
+        parameters
+        ==========
+
+        * password
+
+
+        errors
+        ======
+
+        status 400 if failed to update user
+
+        status 404 if failed to find user
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                'status': 'success',
+                'message': 'user password updated'
+            }
+
+
         """
         user_id = request.matchdict['user_id']
         user = User.get_by_id(user_id)

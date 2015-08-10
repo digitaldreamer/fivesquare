@@ -11,16 +11,26 @@ from storage.mongo import mongodb
 
 
 class MongoObject(object):
+    """
+    The base object to base objects linked with mongo backend storage
+
+    variables:
+
+        * data - the mongo data object
+        * collection - the associated mongo collection  **this needs to be set by the child class**
+    """
     data = {}
     collection = 'test'
 
     def __init__(self, mongo=None):
+        # set timestamps
         now = datetime.utcnow()
         self.data = {
             'created': now,
             'modified': now,
         }
 
+        # load mongo data
         if mongo:
             self.data = self.fromJSON(mongo)
 
@@ -84,6 +94,7 @@ class MongoObject(object):
         now = datetime.utcnow()
         self.modified = now
 
+        # if _id is in keys then the document has been saved, otherwise it's a new document
         if '_id' in self.data.keys():
             # the list needs updating
             ret = mongodb[self.collection].update({'_id': self.data['_id']}, self.data)
@@ -107,6 +118,9 @@ class MongoObject(object):
         return saved
 
     def delete(self):
+        """
+        delete the document
+        """
         deleted = False
         ret = mongodb[self.collection].remove({'_id': self.data['_id']})
 
@@ -120,16 +134,22 @@ class MongoObject(object):
 
     @classmethod
     def get_by_id(cls, id):
+        """
+        load the document by the id
+        """
         obj = None
 
+        # force id into ObjectId
         try:
             _id = ObjectId(id)
         except InvalidId:
             mongo_obj = None
             logger.debug('invalid ObjectId id:{}'.format(id))
         else:
+            # get the mongo_obj
             mongo_obj = mongodb[cls.collection].find_one({'_id': _id})
 
+        # initialize the class if mongo_obj was retrieved
         if mongo_obj:
             obj = cls(mongo=mongo_obj)
         else:
@@ -148,5 +168,7 @@ class MongoObject(object):
     def create(cls):
         """
         creates, saves, and returns a new objects
+
+        this needs to be implamented by the child
         """
-        pass
+        raise NotImplementedError

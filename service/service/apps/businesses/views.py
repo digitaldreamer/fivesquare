@@ -27,50 +27,24 @@ class BusinessViews(object):
         """
         Returns the businesses
 
-        # all results with pagination
-        http://localhost:8000/api/v1/businesses?limit=100&offset=0
+        use limit and offset to paginate::
 
-        # filter results from location to the max distance radius
-        http://localhost:8000/api/v1/businesses?lng=-73.988395&lat=40.7461666&distance=3
+            http://localhost:8000/api/v1/businesses?limit=100&offset=0
 
-        playing with table formatting
+        to restrict results withing a distance from a location use lat, lng, distance, and units::
 
-        =====  =====  =======
-        A      B      A and B
-        =====  =====  =======
-        False  False  False
-        True   False  False
-        False  True   False
-        True   True   True
-        =====  =====  =======
+            http://localhost:8000/api/v1/businesses?lng=-73.988395&lat=40.7461666&distance=3
 
 
-        ======  =====  ======
-        Inputs Output
-        -------------  ------
-        A       B      A or B
-        ======  =====  ======
-        False   False  False
-        True    False  True
-        False   True   True
-        True    True   True
-        ======  =====  ======
+        parameters
+        ==========
 
-
-        =====  =====
-        col 1  col 2
-        =====  =====
-        1      Second column of row 1.
-        2      Second column of row 2.
-
-               Second line of paragraph.
-        3      - Second column of row 3.
-
-               - Second item in bullet
-                   list (row 3, column 2).
-        \      Row 4; column 1 will be empty.
-        =====  =====
-
+        * lat - the latitude of the center
+        * lng - the longitude of the center
+        * distance - the distance from center to restrict search in miles or km
+        * units - [imperial|metric] the units to search in miles or km
+        * limit - the max number of returned businesses
+        * offset - the skipped businesses in the list
         """
         location = []
         lat = request.validated['lat']

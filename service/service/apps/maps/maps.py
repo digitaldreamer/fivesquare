@@ -12,6 +12,9 @@ class GoogleMaps(object):
     API_KEY = ''
 
     def __init__(self, API_KEY):
+        """
+        initialize with the goole maps api key
+        """
         self.API_KEY = API_KEY
 
     def geocode(self, address):
@@ -20,6 +23,23 @@ class GoogleMaps(object):
         from the google maps api
 
         https://developers.google.com/maps/documentation/geocoding/intro
+
+        parameters
+        ==========
+
+        * address (str) - the address to geocode
+
+        errors
+        ======
+
+        fails silently defaulting lat and lng to 0
+
+        returns
+        =======
+
+        ::
+
+            {'lat': 0, 'lng': 0}
         """
         params = {
             'address': address,
@@ -31,9 +51,18 @@ class GoogleMaps(object):
         },
 
         requests.packages.urllib3.disable_warnings()
-        response = requests.get(GOOGLE_MAPS_URL, params=params, verify=False)
-        response_json = response.json()
 
+        # geocode the address
+        try:
+            response = requests.get(GOOGLE_MAPS_URL, params=params, verify=False)
+        except:
+            # fall out if we get any errors geocoding
+            logger.debug('google maps geocode failed')
+            response_json = {}
+        else:
+            response_json = response.json()
+
+        # extract the location from the response
         if response_json.get('status') == 'OK':
             logger.debug('GeoCoded address:{}'.format(address))
             position = response_json['results'][0]['geometry']['location']

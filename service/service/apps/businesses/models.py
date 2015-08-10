@@ -15,6 +15,14 @@ class Business(MongoObject):
 
     def __init__(self, name='', address={}, mongo=None):
         """
+        address = {
+            'street1': '',
+            'street2': '',
+            'city': '',
+            'state': '',
+            'postal_code': '',
+        }
+
         location: [<longitude>, <latitude>]
         """
         super(Business, self).__init__(mongo=mongo)
@@ -76,6 +84,7 @@ class Business(MongoObject):
 
         google_maps = GoogleMaps(config['google_maps.api_key'])
 
+        # set a new address dict and save it to data
         address = {
             'street1': '',
             'street2': '',
@@ -86,11 +95,15 @@ class Business(MongoObject):
         address.update(address_fields)
         self.data['address'] = address
 
+        # geocode the address
         maps_location = google_maps.geocode(self.address_string)
         self.data['location'] = [maps_location['lng'], maps_location['lat']]
 
     @property
     def address_string(self):
+        """
+        return the address in one string
+        """
         return '{street1} {street2}, {city}, {state}, {postal_code}'.format(**self.data['address'])
 
     def toJSON(self):
@@ -105,12 +118,25 @@ class Business(MongoObject):
         """
         Return the businesses
 
-        units: metric|imperial
-        location: [<longitude>, <latitude>]
+        parameters
+        ==========
+
+        * location - [<longitude>, <latitude>]
+        * distance - in miles or km depending on units
+        * units - metric|imperial
+        * offset - the skipped elements in the returned list
+        * limit - the returned max number
+
+
+        returns
+        =======
+
+        [business, ...]
         """
         businesses = []
 
         if location and distance:
+            # restrict to location by distance
             if units == 'metric':
                 radius = 6371  # kilometers
             else:
@@ -120,9 +146,10 @@ class Business(MongoObject):
             max_distance = distance / radius
             mongo_businesses = mongodb[cls.collection].find({'location': {'$nearSphere': location, '$maxDistance': max_distance}}).limit(limit).skip(offset)
         else:
+            # search businesses normally
             mongo_businesses = mongodb[cls.collection].find().sort('created', pymongo.ASCENDING).limit(limit).skip(offset)
 
-
+        # convert mongo objects to business objects
         for mongo_business in mongo_businesses:
             business = cls(mongo=mongo_business)
             businesses.append(business)
