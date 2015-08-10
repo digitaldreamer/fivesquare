@@ -26,6 +26,12 @@ class BusinessViews(object):
         """
         Returns the businesses
 
+        # all results with pagination
+        http://localhost:8000/api/v1/businesses?limit=100&offset=0
+
+        # filter results from location to the max distance radius
+        http://localhost:8000/api/v1/businesses?lng=-73.988395&lat=40.7461666&distance=3
+
         playing with table formatting
 
         =====  =====  =======
@@ -77,7 +83,13 @@ class BusinessViews(object):
             location = [lng, lat]
 
         businesses = Business.businesses(location=location, distance=distance, units=units, limit=limit, offset=offset)
-        businesses_count = Business.count()
+
+        # TODO: this count is wrong when location limiting
+        if location:
+            businesses_count = len(businesses)
+        else:
+            businesses_count = Business.count()
+
         businesses_jsonable = []
 
         for business in businesses:
@@ -211,7 +223,7 @@ class BusinessReviewViews(object):
             }
         else:
             logger.debug('Failed to create review for business:{}'.format(business_id))
-            request.response.status_int = 404
+            request.response.status_int = 400
             response_body = {
                 'status': 'error',
                 'message': 'failed to create review for business'

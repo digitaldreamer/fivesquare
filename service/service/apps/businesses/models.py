@@ -39,6 +39,10 @@ class Business(MongoObject):
             self.address = address
 
     @property
+    def location(self):
+        return self.data.get('location', [0, 0])
+
+    @property
     def name(self):
         return self.data.get('name', '')
 
