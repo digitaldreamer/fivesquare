@@ -14,6 +14,18 @@ docs: clean
 
 ubuntu:
 	sudo apt-get install -y libffi-dev
+	sudo apt-get install -y ntp
+	sudo apt-get install -y vim
+	sudo apt-get install -y htop
+	sudo apt-get install -y build-essential
+	sudo apt-get install -y git
+	sudo apt-get install -y bash-completion
+	sudo apt-get install -y python-dev
+	sudo apt-get install -y python-setuptools
+	sudo apt-get install -y libpq-dev
+	sudo apt-get install -y mongodb
+	sudo apt-get install -y redis-server
+	sudo easy_install virtualenv
 
 redis:
 	redis-cli -h pub-redis-19387.us-east-1-3.6.ec2.redislabs.com -p 19387 -a 'hinge'
