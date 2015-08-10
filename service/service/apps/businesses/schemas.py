@@ -12,7 +12,7 @@ from colander import (
 
 
 class BusinessesSchema(MappingSchema):
-    lat = SchemaNode(Float(), location='querystring', type='float', default=0)
+    lat = SchemaNode(Float(), location='querystring', type='float', default=0, description='This is a description')
     lng = SchemaNode(Float(), location='querystring', type='float', default=0)
     distance = SchemaNode(Float(), location='querystring', type='float', default=1)
     units = SchemaNode(String(), location='querystring', type='str', validator=OneOf(['imperial', 'metric']), default='imperial')
