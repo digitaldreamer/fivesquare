@@ -18,10 +18,8 @@ ENDPOINTS
 ---------
 
 | :doc:`/businesses <services/businesses>`
-| :doc:`/reviews <index>`
-| :doc:`/users <services/auth>`
+| :doc:`/businesses/id/reviews <services/businesses>`
 | :doc:`/auth <services/auth>`
-| :doc:`/search <index>`
 |
 
 Services

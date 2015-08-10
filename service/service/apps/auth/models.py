@@ -25,6 +25,14 @@ class User(MongoObject):
             self.password = password
 
     @property
+    def active(self):
+        return self.data.get('active', '')
+
+    @active.setter
+    def active(self, active):
+        self.data['active'] = active
+
+    @property
     def email(self):
         return self.data.get('email', '')
 

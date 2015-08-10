@@ -168,17 +168,18 @@ class UserAPI(unittest.TestCase):
         self.testapp = TestApp(app)
         self.config = testing.setUp(settings=self.settings)
 
-    def tearDown(self):
-        user = User.get_by_email('hello@example.com')
+        self.created = []
 
-        if user:
-            user.delete()
+    def tearDown(self):
+        for obj in self.created:
+            obj.delete()
 
         testing.tearDown()
 
-    def test_user_creation(self):
+    def test_user(self):
         response = self.testapp.post_json('/api/v1/users', {}, status=400)
 
+        # create new user
         payload = {
             'email': 'hello@example.com',
             'password': 'hello',
@@ -189,7 +190,31 @@ class UserAPI(unittest.TestCase):
         # check duplicate
         response = self.testapp.post_json('/api/v1/users', payload, status=400)
 
-        # check database and clean up
+        # check database
         user = User.get_by_email('hello@example.com')
         self.assertTrue(user)
-        self.assertTrue(user.delete())
+        self.created.append(user)
+
+        # get user
+        endpoint = '/api/v1/users/{}'.format(user.id)
+        response = self.testapp.get(endpoint, status=200)
+        self.assertTrue(response.json['id'])
+
+        # update user
+        payload = {
+            'active': True,
+            'email': 'hello@example.com',
+        }
+        endpoint = '/api/v1/users/{}'.format(user.id)
+        response = self.testapp.put_json(endpoint, payload, status=200)
+        user = User.get_by_id(user.id)
+        self.assertTrue(user.active)
+
+        # change password
+        payload = {
+            'password': 'world',
+        }
+        endpoint = '/api/v1/users/{}/password'.format(user.id)
+        response = self.testapp.put_json(endpoint, payload, status=200)
+        user = User.authenticate_user('hello@example.com', 'world')
+        self.assertTrue(user)

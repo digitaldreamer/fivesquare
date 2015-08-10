@@ -13,7 +13,7 @@ class NewUserSchema(MappingSchema):
 
 
 class UserSchema(MappingSchema):
-    active = SchemaNode(Boolean(), location='body', type='bool', missing=False)
+    active = SchemaNode(Boolean(), location='body', type='bool', default=False, missing=False)
     email = SchemaNode(String(), location='body', type='str')
 
 

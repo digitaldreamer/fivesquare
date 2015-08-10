@@ -98,6 +98,26 @@ class UserViews(object):
         request.response.content_type = 'application/json'
         return request.response
 
+    @user.get()
+    def user_get(request):
+        user_id = request.matchdict['user_id']
+        user = User.get_by_id(user_id)
+
+        if user:
+            logger.debug('got user:{}'.format(user_id))
+            response_body = user.json
+        else:
+            logger.debug('could not find user:{}'.format(user_id))
+            request.response.status_int = 404
+            response_body = json.dumps({
+                'status': 'error',
+                'message': 'user does not exist'
+            })
+
+        request.response.body = response_body
+        request.response.content_type = 'application/json'
+        return request.response
+
     @user.put(schema=UserSchema)
     def user_put(request):
         """
