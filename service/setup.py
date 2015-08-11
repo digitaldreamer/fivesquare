@@ -38,5 +38,9 @@ setup(name='service',
       entry_points="""\
       [paste.app_factory]
       main = service:main
+      [console_scripts]
+      create_user = service.scripts.create_user:main
+      reset_db = service.scripts.reset_db:main
+      load_db = service.scripts.load_db:main
       """,
       )

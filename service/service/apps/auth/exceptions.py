@@ -1,0 +1,2 @@
+class UserSaveError(Exception):
+    pass

@@ -3,14 +3,17 @@ set -e
 
 ROOT=$(pwd)
 
+export PYRAMID_SETTINGS="production.ini#main"
+
 # intialize the app
 cd service
 python setup.py develop
 cd ${ROOT}
 
-# compile sphinx
-cd service/docs
-make html
+# compile project
+cd service
+make clean
+make build
 cd ${ROOT}
 
 # run the app

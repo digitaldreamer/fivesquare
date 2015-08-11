@@ -1,49 +1,37 @@
-STATIC_DIR=static
-HTML_DIR=../../html
-BUILD_DIR=$(STATIC_DIR)/build
-RJS=$(STATIC_DIR)/js/libs/r.js
+ROOT_DIR=$(CURDIR)
+DOCS_DIR=$(ROOT_DIR)/docs
+DOCS_BUILD_DIR=$(ROOT_DIR)/docs/_build
 
-CSS_NAME=styles
-CSS_LESS=$(STATIC_DIR)/css/$(CSS_NAME).less
-CSS_BUILD=$(BUILD_DIR)/$(CSS_NAME).css
-CSS_MIN=$(BUILD_DIR)/$(CSS_NAME).min.css
-
-JS_NAME=main
-JS_FILE=$(STATIC_DIR)/js/build.js
-JS_BUILD=$(BUILD_DIR)/$(JS_NAME).js
-JS_MIN=$(BUILD_DIR)/$(JS_NAME).min.js
-
-.PHONY: static
+.PHONY: static docs
 
 run:
 	pserve development.ini --reload
 
-resetdb:
-	psql -U postgres -c 'drop database poseidon'
-	psql -U postgres -c 'create database poseidon'
-	psql -U postgres poseidon < poseidon.psql
+build: docs
 
-build: static
-	cp -Rf $(STATIC_DIR) $(HTML_DIR)
+docs: clean
+	cd $(DOCS_DIR); make html
 
-static: css js
-css: less
-js: require
+ubuntu:
+	sudo apt-get install -y libffi-dev
+	sudo apt-get install -y ntp
+	sudo apt-get install -y vim
+	sudo apt-get install -y htop
+	sudo apt-get install -y build-essential
+	sudo apt-get install -y git
+	sudo apt-get install -y bash-completion
+	sudo apt-get install -y python-dev
+	sudo apt-get install -y python-setuptools
+	sudo apt-get install -y libpq-dev
+	sudo apt-get install -y mongodb
+	sudo apt-get install -y redis-server
+	sudo easy_install virtualenv
 
-less: builddir
-	lessc $(CSS_LESS) $(CSS_BUILD)
-	java -jar utils/yuicompressor-2.4.2.jar $(CSS_BUILD) -o $(CSS_MIN)
-
-require: builddir
-	node $(RJS) -o $(JS_FILE) optimize=none out=$(JS_BUILD)
-	java -jar utils/yuicompressor-2.4.2.jar $(JS_BUILD) -o $(JS_MIN)
-
-builddir:
-	mkdir -p $(BUILD_DIR)
+redis:
+	redis-cli -h pub-redis-19387.us-east-1-3.6.ec2.redislabs.com -p 19387 -a 'hinge'
 
 clean:
-	rm -rf $(BUILD_DIR)
-	rm -rf $(HTML_DIR)/$(STATIC_DIR)
+	rm -rf $(DOCS_BUILD_DIR)
 
 tailog:
 	heroku logs --tail --app hinge-api-interview-juniper
