@@ -115,9 +115,10 @@ There is a ``Makefile`` in the /service directory to help automate commands. Her
 command  description
 =======  ===========
 run      (default) runs the pyramid pserve local server
-build    Second column of row 2.
+build    builds the project
+docs     builds the docs
 ubuntu   installs the dependencies into an ubuntu server
-redis    used to connect to the rediscloud cli
+redis    use to connect to the rediscloud cli
 clean    cleans all compiled files
 tailog   tail the heroku server logs
 =======  ===========
