@@ -53,18 +53,24 @@ def create_access_token(user):
 
     data = {
         'user_id': str(user.id),
+        'password': user.password,
         'iat': datetime.utcnow(),
     }
     access_token = jwt.encode(data, config.get('pepper', ''), algorithm='HS256')
-
-    # TODO: save the access_token in the database
 
     return access_token
 
 
 def validate_access_token(access_token):
     """
+    This request requires validation. To get an access token use the ``/authenticate`` endpoint.
+    """
+
+    """
     Check to see if the access_token is valid
+
+    The access token will invalidate if the user changes their password.
+
 
     parameters
     ==========
@@ -75,15 +81,10 @@ def validate_access_token(access_token):
     =======
 
     returns True or False depending on if the access_token is valid
-
     """
     from settings import config
 
     validated = False
-
-    # TODO: check the database for the existence of the access_token
-    # the theory is that the access_token then can be explicitly removed
-    # i.e. resetting the user's password
 
     try:
         decoded = jwt.decode(access_token, config.get('pepper', ''), algorithms=['HS256'])
@@ -99,11 +100,13 @@ def validate_access_token(access_token):
         # TODO: make the age configurable
         # for now the access_token is valid for 5 hours
         if age.seconds > 60 * 60 * 5:
-            logger.debug('Stale Key, timestamp expired')
-        elif user:
+            logger.debug('stale access token, timestamp expired')
+        elif user and decoded['password'] == user.password:
             validated = {
                 'user': user,
             }
-            logger.debug('Valid Key user:{}'.format(user.id))
+            logger.debug('Valid access token for user:{}'.format(user.id))
+        else:
+            logger.debug('access token failed to validate')
 
     return validated
