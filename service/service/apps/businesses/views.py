@@ -27,6 +27,8 @@ class BusinessViews(object):
         """
         Returns the businesses
 
+        location format = [lng, lat]
+
         use limit and offset to paginate::
 
             http://localhost:8000/api/v1/businesses?limit=100&offset=0
@@ -36,15 +38,38 @@ class BusinessViews(object):
             http://localhost:8000/api/v1/businesses?lng=-73.988395&lat=40.7461666&distance=3
 
 
-        parameters
-        ==========
+        returns
+        =======
 
-        * lat - the latitude of the center
-        * lng - the longitude of the center
-        * distance - the distance from center to restrict search in miles or km
-        * units - [imperial|metric] the units to search in miles or km
-        * limit - the max number of returned businesses
-        * offset - the skipped businesses in the list
+        ::
+
+            {
+                "businesses": [{
+                    "rating": 2.25,
+                    "modified": "2015-08-10T00:20:14.370000",
+                    "address": {
+                        "street1": "Time Square",
+                        "postal_code": "",
+                        "street2": "",
+                        "city": "New York",
+                        "state": "NY"
+                    },
+                    "id": "55c7ee3efad9b43993d7190f",
+                    "location": [
+                        -73.985131,
+                        40.758895
+                    ],
+                    "tags": [
+                        "hello",
+                        "world",
+                        "example",
+                        "awesome"
+                    ],
+                    "name": "Time Square",
+                    "created": "2015-08-10T00:20:13.760000"
+                }],
+                "count": 1
+            }
         """
         location = []
         lat = request.validated['lat']
@@ -54,13 +79,15 @@ class BusinessViews(object):
         limit = request.validated['limit']
         offset = request.validated['offset']
 
+        # set location only if both lat and lng
         if lat and lng:
             location = [lng, lat]
 
         businesses = Business.businesses(location=location, distance=distance, units=units, limit=limit, offset=offset)
 
-        # TODO: this count is wrong when location limiting
+        # get business count to help pagination
         if location:
+            # TODO: this count is wrong when location limiting
             businesses_count = len(businesses)
         else:
             businesses_count = Business.count()
@@ -85,7 +112,23 @@ class BusinessViews(object):
         """
         create a new business
 
-        requires authentication with access_token
+        **requires authentication with an access_token**
+
+
+        errors
+        ======
+
+        * status 500 - if the user can't be saved
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                "id": ""
+            }
         """
         user = request.validated['user']
         name = request.validated['name']
@@ -121,6 +164,56 @@ class BusinessViews(object):
         """
         Returns the business
 
+        errors
+        ======
+
+        * status 404 - if the business can't be found
+
+
+        returns
+        =======
+
+        /businesses/<id>?reviews=true
+
+        ::
+
+
+            {
+                "rating": 5,
+                "modified": "2015-08-10T00:20:14.370000",
+                "address": {
+                    "street1": "Time Square",
+                    "postal_code": "",
+                    "street2": "",
+                    "city": "New York",
+                    "state": "NY"
+                },
+                "id": "55c7ee3efad9b43993d7190f",
+                "location": [
+                    -73.985131,
+                    40.758895
+                ],
+                "reviews": [
+                    {
+                    "rating": 5,
+                    "modified": "2015-08-10T00:20:17.753000",
+                    "id": "55c7ee41fad9b43993d71919",
+                    "user_id": "55c7ee3dfad9b43993d7190e",
+                    "reviewed_id": "55c7ee3efad9b43993d7190f",
+                    "tags": [
+                        "awesome"
+                    ],
+                    "text": "This is awesome.",
+                    "created": "2015-08-10T00:20:17.753000",
+                    "reviewed_collection": "businesses"
+                    }
+                ],
+                "tags": [
+                    "awesome"
+                ],
+                "name": "Time Square",
+                "created": "2015-08-10T00:20:13.760000"
+            }
         """
         business_id = request.matchdict['business_id']
         include_reviews = request.validated['reviews']
@@ -163,6 +256,36 @@ class BusinessReviewViews(object):
     def reviews_get(request):
         """
         Returns the business reviews
+
+
+        errors
+        ======
+
+        * status 404 - if the business can't be found
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                "reviews": [
+                    {
+                        "rating": 5,
+                        "modified": "2015-08-10T00:20:17.753000",
+                        "id": "55c7ee41fad9b43993d71919",
+                        "user_id": "55c7ee3dfad9b43993d7190e",
+                        "reviewed_id": "55c7ee3efad9b43993d7190f",
+                        "tags": [
+                            "awesome"
+                        ],
+                        "text": "This is awesome.",
+                        "created": "2015-08-10T00:20:17.753000",
+                        "reviewed_collection": "businesses"
+                    }
+                ]
+            }
         """
         business_id = request.matchdict['business_id']
         business = Business.get_by_id(business_id)
@@ -189,7 +312,23 @@ class BusinessReviewViews(object):
         """
         creates new business review
 
-        auth required with access_token
+        **authentication required with access_token**
+
+
+        errors
+        ======
+
+        * status 400 - if failed to create business
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                "id": ""
+            }
         """
         business_id = request.matchdict['business_id']
         business = Business.get_by_id(business_id)
@@ -228,6 +367,32 @@ class BusinessReviewViews(object):
     def review_get(request):
         """
         Returns the business review
+
+
+        errors
+        ======
+
+        * status 404 - if the review couldn't be found
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                "rating": 5,
+                "modified": "2015-08-10T00:20:17.753000",
+                "id": "55c7ee41fad9b43993d71919",
+                "user_id": "55c7ee3dfad9b43993d7190e",
+                "reviewed_id": "55c7ee3efad9b43993d7190f",
+                "tags": [
+                    "awesome"
+                ],
+                "text": "This is awesome.",
+                "created": "2015-08-10T00:20:17.753000",
+                "reviewed_collection": "businesses"
+            }
         """
         business_id = request.matchdict['business_id']
         review_id = request.matchdict['review_id']

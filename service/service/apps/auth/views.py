@@ -37,14 +37,7 @@ class AuthViews(object):
             /endpont?access_token=<access token>
 
 
-        Parameters
-        ==========
-
-        * email - the user's email
-        * password - the user's password
-
-
-        Returns
+        returns
         =======
 
         returns 401 auth error if fails, otherswise returns::
@@ -92,17 +85,10 @@ class UserViews(object):
         TODO: have a user activation process
 
 
-        parameters
-        ==========
-
-        * email
-        * password
-
-
         errors
         ======
 
-        status 400 if failed
+        * status 400 - if failed
 
 
         returns
@@ -138,7 +124,27 @@ class UserViews(object):
     @user.get()
     def user_get(request):
         """
-        Get user
+        get user
+
+
+        errors
+        ======
+
+        * status 404 - if the user couldn't be found
+
+
+        returns
+        =======
+
+        ::
+
+            {
+                "modified": "2015-08-10T00:20:13.708000",
+                "active": "false",
+                "id": "55c7ee3dfad9b43993d7190e",
+                "email": "test@example.com",
+                "created": "2015-08-10T00:20:12.882000"
+            }
         """
         user_id = request.matchdict['user_id']
         user = User.get_by_id(user_id)
@@ -164,19 +170,11 @@ class UserViews(object):
         Update user
 
 
-        parameters
-        ==========
-
-        * active - true|false
-        * email
-
-
         errors
         ======
 
-        status 400 if failed to update user
-
-        status 404 if user isn't found
+        * status 400 - if failed to update user
+        * status 404 - if user isn't found
 
 
         returns
@@ -229,18 +227,11 @@ class UserViews(object):
         Update user's password
 
 
-        parameters
-        ==========
-
-        * password
-
-
         errors
         ======
 
-        status 400 if failed to update user
-
-        status 404 if failed to find user
+        * status 400 - if failed to update user
+        * status 404 - if failed to find user
 
 
         returns
