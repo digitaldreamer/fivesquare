@@ -6,9 +6,27 @@
 Welcome to fivesquare's documentation!
 ======================================
 
+These docs outline the usage of the API. See the `README <https://github.com/digitaldreamer/fivesquare>`_ for the project documentation.
+
 All endpoints are rooted from the API Base URL::
 
     http://hinge-api-interview-juniper.herokuapp.com/api/v1
+
+An example call to the ``/businesses`` endpoint::
+
+    http://hinge-api-interview-juniper.herokuapp.com/api/v1/businesses
+
+**WARNING: In practice the APIs should go through https using ssl, but for this demo the API is served through http.**
+
+
+REFERENCE
+=========
+
+| website/api docs: http://hinge-api-interview-juniper.herokuapp.com/
+| api root: http://hinge-api-interview-juniper.herokuapp.com/api/v1
+| repo: https://github.com/digitaldreamer/fivesquare
+| wiki: https://github.com/digitaldreamer/fivesquare/wiki
+|
 
 
 ENDPOINTS

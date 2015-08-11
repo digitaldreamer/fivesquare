@@ -14,7 +14,7 @@ The Google Maps API is used to geocode Business Addresses.
 Sphinx is used to generate the API documentation.
 The project is structured to be served on Heroku.
 
-WARNING: all endpoints in practice should be run through ssl/https, but for the purpose of this demo the server will run through http.
+**WARNING: In practice the APIs should go through https using ssl, but for this demo the API is served through http.**
 
 
 REFERENCE
